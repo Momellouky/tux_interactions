@@ -1,0 +1,3 @@
+opencv | opencv-contrib-python 
+pandas | pip install pandas
+oscpy | pip install oscpy
