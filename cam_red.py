@@ -1,11 +1,22 @@
 import cv2
 import numpy as np
+from time import sleep
+import socket
+import sys
+import select
 
 # Initialize video capture object
 cap = cv2.VideoCapture(0)
 
+
+address = ('localhost', 6006)
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+
+
 lower_red_vb = 115
 while True:
+    sleep(1/30)
     # Capture frame-by-frame
     ret, frame = cap.read()
 
@@ -27,6 +38,13 @@ while True:
     # Find contours in the masked image
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+    #si cube rouge detecté
+    if len(contours) > 0:
+        data = b'P_DOWN'
+        client_socket.sendto(data, address)
+    else:
+        data = b'R_DOWN'
+        client_socket.sendto(data, address)
     # Iterate through contours and draw bounding box around red object
     for cnt in contours:
         area = cv2.contourArea(cnt)
