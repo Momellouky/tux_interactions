@@ -7,12 +7,30 @@ import serial
 import socket
 import numpy as np
 from time import sleep
+import atexit
+import cv2
+import mediapipe as mp
+
+from Direction.face_tracking import get_left_right
 
 address = ('localhost', 6006)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # replace COM5 with whichever serial port the Arduino is connected to
 arduino = serial.Serial(port='COM5', baudrate=9600, timeout=1)
+
+# Initialize MediaPipe Face Detection
+mp_face_detection = mp.solutions.face_detection
+mp_drawing = mp.solutions.drawing_utils
+
+# Create a face detection instance
+face_detection = mp_face_detection.FaceDetection(min_detection_confidence=0.5)
+
+# Initialize the webcam
+cap = cv2.VideoCapture(0)
+
+# Get the width of the frame
+frame_width = int(cap.get(3))
 
 print("STK input client started")
 
@@ -37,28 +55,43 @@ def generate_frame_list(n) :
 
     return lst
 
+# Release resources
+def exit_handler():
+    cap.release()
+    arduino.close()
+
+atexit.register(exit_handler)
+
 frame_counter = 0
 
-will_acc = False
-will_dri = False
-
 while True: # main loop
+    will_acc = False
+    will_dri = False
+    will_left = False
+    will_right = False
+
+    # arduino
     poll_type, poll_value = poll_input()
 
-    frames_on = int(poll_value*60)
-    frame_list = generate_frame_list(frames_on)
+    poll_frames_on = int(poll_value*60)
+    poll_frame_list = generate_frame_list(poll_frames_on)
 
-    if poll_type == "acc" : #accélération
-        if frame_list[frame_counter] == 1 :
-            will_acc = True
-        else :
-            will_acc = False
-    elif poll_type == "dri" : #drift
-        if poll_value == 1 :
-            will_dri = True
-        else :
-            will_dri = False
+    if poll_type == "acc" and poll_frame_list[frame_counter] == 1 : #accélération
+        will_acc = True
+    elif poll_type == "dri" and poll_value == 1 : #drift
+        will_dri = True
     
+    # face detection
+    lr_type, lr_value = get_left_right(cap, face_detection)
+
+    lr_frames_on = int(lr_value*60)
+    lr_frame_list = generate_frame_list(lr_frames_on)
+
+    if lr_type == "left" and lr_frame_list[frame_counter] == 1 : #tourner à gauche
+        will_left = True
+    elif lr_type == "right" and lr_frame_list[frame_counter] == 1 : #tourner à droite
+        will_right = True
+
     # send commands
     if will_acc :
         client_socket.sendto(b'P_ACCELERATE', address)
@@ -68,10 +101,15 @@ while True: # main loop
         client_socket.sendto(b'P_SKIDDING', address)
     else :
         client_socket.sendto(b'R_SKIDDING', address)
+    if will_left :
+        client_socket.sendto(b'P_LEFT', address)
+    else :
+        client_socket.sendto(b'R_LEFT', address)
+    if will_right :
+        client_socket.sendto(b'P_RIGHT', address)
+    else :
+        client_socket.sendto(b'R_RIGHT', address)
 
     frame_counter += 1
     frame_counter = frame_counter % 60
     sleep(1/60)
-
-# TODO : proper way to end script that closes connection to serial port
-# currently, we need to unplug and replug the Arduino to be able to relaunch the script
