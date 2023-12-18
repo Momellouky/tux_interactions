@@ -12,6 +12,7 @@ import cv2
 import mediapipe as mp
 
 from Direction.face_tracking import get_left_right
+from mic_db import get_rescue
 
 address = ('localhost', 6006)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -92,6 +93,9 @@ while True: # main loop
     elif lr_type == "right" and lr_frame_list[frame_counter] == 1 : #tourner à droite
         will_right = True
 
+    # microphone
+    will_rescue = get_rescue(duration=1/120, threshold=0.5) # 1/120 is an arbitrary value to make sure this loop doesnt take too much time
+
     # send commands
     if will_acc :
         client_socket.sendto(b'P_ACCELERATE', address)
@@ -109,6 +113,10 @@ while True: # main loop
         client_socket.sendto(b'P_RIGHT', address)
     else :
         client_socket.sendto(b'R_RIGHT', address)
+    if will_rescue :
+        client_socket.sendto(b'P_RESCUE', address)
+    else :
+        client_socket.sendto(b'R_RESCUE', address)
 
     frame_counter += 1
     frame_counter = frame_counter % 60
