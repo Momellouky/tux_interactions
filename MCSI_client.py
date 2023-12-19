@@ -94,7 +94,7 @@ while True: # main loop
         will_right = True
 
     # microphone
-    will_rescue = get_rescue(duration=1/120, threshold=0.5) # 1/120 is an arbitrary value to make sure this loop doesnt take too much time
+    will_rescue = get_rescue(duration=1/90, threshold=0.5, amplification=10000) # 1/90 is an arbitrary value to make sure this loop doesnt take too much time
 
     # send commands
     if will_acc :

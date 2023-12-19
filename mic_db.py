@@ -1,7 +1,7 @@
 import sounddevice as sd
 import numpy as np
 
-def get_rescue(duration, threshold) :
+def get_rescue(duration, threshold, amplification) :
     val = False
 
     # Define the sampling frequency
@@ -13,7 +13,8 @@ def get_rescue(duration, threshold) :
     sd.wait()
 
     # Calculate the intensity of the recording
-    intensity = np.sqrt(np.mean(recording**2))*1000
+    intensity = np.sqrt(np.mean(recording**2))*amplification
+    print(intensity)
 
     # Check if intensity is above threshold
     if intensity > threshold:
