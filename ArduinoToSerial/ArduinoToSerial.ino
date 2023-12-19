@@ -5,6 +5,7 @@ void setup() {
     Serial.begin(9600);
     Serial.setTimeout(1);
     pinMode(5, INPUT);
+    pinMode(2, INPUT);
 }
 void loop() {
   // drift
@@ -33,6 +34,10 @@ void loop() {
 
   Serial.print("acc ");
   Serial.println(power);
+
+  int vibrationState = digitalRead(2);
+  Serial.print("bst ");
+  Serial.println(vibrationState);
 
   delay(10);
 }

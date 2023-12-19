@@ -70,6 +70,7 @@ while True: # main loop
     will_dri = False
     will_left = False
     will_right = False
+    will_bst = False
 
     # arduino
     poll_type, poll_value = poll_input()
@@ -81,6 +82,8 @@ while True: # main loop
         will_acc = True
     elif poll_type == "dri" and poll_value == 1 : #drift
         will_dri = True
+    elif poll_type == "bst" and poll_value == 1 : # boost
+        will_bst = True
     
     # face detection
     lr_type, lr_value = get_left_right(cap, face_detection)
@@ -117,6 +120,10 @@ while True: # main loop
         client_socket.sendto(b'P_RESCUE', address)
     else :
         client_socket.sendto(b'R_RESCUE', address)
+    if will_bst :
+        client_socket.sendto(b'P_BOOST', address)
+    else :
+        client_socket.sendto(b'R_BOOST', address)
 
     frame_counter += 1
     frame_counter = frame_counter % 60
