@@ -13,6 +13,7 @@ import mediapipe as mp
 
 from Direction.face_tracking import get_left_right
 from mic_db import get_rescue
+import FingerCounter.FingerCounter as fc 
 
 address = ('localhost', 6006)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -32,6 +33,8 @@ cap = cv2.VideoCapture(0)
 
 # Get the width of the frame
 frame_width = int(cap.get(3))
+
+count_fingers = fc.FingerCounter()
 
 print("STK input client started")
 
@@ -65,12 +68,15 @@ atexit.register(exit_handler)
 
 frame_counter = 0
 
+collaboration = True
+
 while True: # main loop
     will_acc = False
     will_dri = False
     will_left = False
     will_right = False
     will_bst = False
+    will_rescue = False
 
     # arduino
     poll_type, poll_value = poll_input()
@@ -96,8 +102,17 @@ while True: # main loop
     elif lr_type == "right" and lr_frame_list[frame_counter] == 1 : #tourner à droite
         will_right = True
 
-    # microphone
-    will_rescue = get_rescue(duration=1/90, threshold=0.5, amplification=10000) # 1/90 is an arbitrary value to make sure this loop doesnt take too much time
+    # microphone rescue
+    if not collaboration :
+        will_rescue = get_rescue(duration=1/90, threshold=0.5, amplification=10000) # 1/90 is an arbitrary value to make sure this loop doesnt take too much time
+
+    print("test")
+
+    # 10 fingers rescue
+    if collaboration :
+        fingers_value = count_fingers.countFingers(cap)
+        if fingers_value >= 10 :
+            will_rescue = True
 
     # send commands
     if will_acc :

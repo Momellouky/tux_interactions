@@ -30,17 +30,18 @@ class FingerCounter :
 
         return top_left, top_right, bottom_left, bottom_right
     
-    def countFingers(self) : 
+    def countFingers(self, cap) : 
+        fingerCount = 0
         with self.mp_hands.Hands(
             model_complexity=0,
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5) as hands:
-            while self.cap.isOpened():
-                success, image = self.cap.read()
+            if self.cap.isOpened():
+                success, image = cap.read()
                 if not success:
                     print("Ignoring empty camera frame.")
                     # If loading a video, use 'break' instead of 'continue'.
-                    continue
+                    # continue
                 
                 lt_image = self._split24(image)
                 print(f" lentgth of lt_image : {len(lt_image)}" )
@@ -108,7 +109,8 @@ class FingerCounter :
                 # write how many hands are detected.
                 print(f"finger count : {fingerCount}")
                 # Display image
-                cv2.imshow('MediaPipe Hands', image)
-                if cv2.waitKey(5) & 0xFF == 27:
-                 break
-        self.cap.release()
+                # cv2.imshow('MediaPipe Hands', image)
+                """if cv2.waitKey(5) & 0xFF == 27:
+                 break"""
+        #self.cap.release()
+        return fingerCount
