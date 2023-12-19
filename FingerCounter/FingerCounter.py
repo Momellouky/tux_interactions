@@ -44,8 +44,8 @@ class FingerCounter :
                     # continue
                 
                 lt_image = self._split24(image)
-                print(f" lentgth of lt_image : {len(lt_image)}" )
-                cv2.imshow("img", lt_image[0])
+                # print(f" lentgth of lt_image : {len(lt_image)}" )
+                # cv2.imshow("img", lt_image[0])
                 # To improve performance, optionally mark the image as not writeable to
                 # pass by reference.
                 fingerCount = 0
@@ -107,7 +107,7 @@ class FingerCounter :
                 cv2.putText(image, str(fingerCount), (50, 450), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 10)
 
                 # write how many hands are detected.
-                print(f"finger count : {fingerCount}")
+                # print(f"finger count : {fingerCount}")
                 # Display image
                 # cv2.imshow('MediaPipe Hands', image)
                 """if cv2.waitKey(5) & 0xFF == 27:

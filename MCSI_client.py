@@ -14,6 +14,7 @@ import mediapipe as mp
 from Direction.face_tracking import get_left_right
 from mic_db import get_rescue
 import FingerCounter.FingerCounter as fc 
+from cam_red import get_brake
 
 address = ('localhost', 6006)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -77,6 +78,7 @@ while True: # main loop
     will_right = False
     will_bst = False
     will_rescue = False
+    will_brake = False
 
     # arduino
     poll_type, poll_value = poll_input()
@@ -106,13 +108,14 @@ while True: # main loop
     if not collaboration :
         will_rescue = get_rescue(duration=1/90, threshold=0.5, amplification=10000) # 1/90 is an arbitrary value to make sure this loop doesnt take too much time
 
-    print("test")
-
     # 10 fingers rescue
     if collaboration :
         fingers_value = count_fingers.countFingers(cap)
         if fingers_value >= 10 :
             will_rescue = True
+
+    # brake
+    will_brake = get_brake(cap, sensitivity = 150) 
 
     # send commands
     if will_acc :
@@ -139,6 +142,10 @@ while True: # main loop
         client_socket.sendto(b'P_BOOST', address)
     else :
         client_socket.sendto(b'R_BOOST', address)
+    if will_brake :
+        client_socket.sendto(b'P_BRAKE', address)
+    else :
+        client_socket.sendto(b'R_BRAKE', address)
 
     frame_counter += 1
     frame_counter = frame_counter % 60
