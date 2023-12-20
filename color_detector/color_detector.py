@@ -30,7 +30,7 @@ class Color_Detector :
     index = ["color", "color_name", "hex", "R", "G", "B"]
     
     colors = pd.read_csv(self.colors_dir, names=index, header=None)
-    return colors; 
+    return colors
 
   def __get_color_name(self, colors, R, G, B) -> str:
       minimum = 10000
