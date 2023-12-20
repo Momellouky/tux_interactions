@@ -63,15 +63,15 @@ class Color_Detector :
     self.cap.release()
     cv.destroyAllWindows()
   
-  def detect_color(self) -> None :
+  def detect_color(self, cap) -> None :
 
-    cv.namedWindow('Webcam')
+    # cv.namedWindow('Webcam')
 
-    success, img = self.cap.read()
+    success, img = cap.read()
     if not success : 
         print("We got no frame. ")
     else : 
-      cv.imshow('Webcam', img)
+      # cv.imshow('Webcam', img)
 
       # extracting color 
       r, g, b = self.__extract_color(img)
