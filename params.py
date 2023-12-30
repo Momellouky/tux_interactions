@@ -14,15 +14,16 @@ COLORS_PATH = CURRENT_DIRECTORY
 
 DEFAULT_CAM_ID = 0
 
-ARROW_FILE = "/home/wannatry/Mellouky/M2_SIIA/tux_interactor/dev/tux_interactions/arrow_colors.csv"
-BOWLING_BALL_FILE = "/home/wannatry/Mellouky/M2_SIIA/tux_interactor/dev/tux_interactions/bowling_ball_colors.csv"
-SKIMMER_FILE = "/home/wannatry/Mellouky/M2_SIIA/tux_interactor/dev/tux_interactions/skimmer_colors.csv"
-ANCHOR_FILE = "/home/wannatry/Mellouky/M2_SIIA/tux_interactor/dev/tux_interactions/anchor_colors.csv"
-PARACHUTE_FILE = "/home/wannatry/Mellouky/M2_SIIA/tux_interactor/dev/tux_interactions/parachute_colors.csv"
-PLANGER_FILE = "/home/wannatry/Mellouky/M2_SIIA/tux_interactor/dev/tux_interactions/planger_colors.csv"
-BOX_FILE = "/home/wannatry/Mellouky/M2_SIIA/tux_interactor/dev/tux_interactions/box_colors.csv"
-CUPCAKE_FILE = "/home/wannatry/Mellouky/M2_SIIA/tux_interactor/dev/tux_interactions/cupcake_colors.csv"
-BASKETBALL_FILE = "/home/wannatry/Mellouky/M2_SIIA/tux_interactor/dev/tux_interactions/arrow_colors.csv"
-BULLET_FILE = "/home/wannatry/Mellouky/M2_SIIA/tux_interactor/dev/tux_interactions/bullet_colors.csv"
+ARROW_FILE = "ev_colors/arrow_ev.csv"
+BOWLING_BALL_FILE = "ev_colors/bowling_ball_ev.csv"
+SKIMMER_FILE = "ev_colors/skimmer_ev.csv"
+ANCHOR_FILE = "ev_colors/anchor_ev.csv"
+PARACHUTE_FILE = "ev_colors/parachute_ev.csv"
+PLANGER_FILE = "ev_colors/planger_ev.csv"
+BOX_FILE = "ev_colors/box_ev.csv"
+CUPCAKE_FILE = "ev_colors/cupcake_ev.csv"
+BASKETBALL_FILE = "ev_colors/basketball_ev.csv"
+BULLET_FILE = "ev_colors/bullet_colors.csv"
+BLACK_BOX_FILE = "ev_colors/black_box_ev.csv"
 
 DATA_FIRE = b'FIRE'

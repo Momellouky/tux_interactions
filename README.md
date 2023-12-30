@@ -30,5 +30,5 @@ The Arduino sketch uses the Grove Ultrasonic Ranger sensor, which needs the [Ult
 - Launch MCSI_serveur Python script in a terminal. You should see "STK input server started" in the terminal.
 - Open SuperTuxKart and navigate to a track.
     - It's recommended to do this before launching MCSI_client Python script because the client manipulates keyboard inputs, which can lead to unwanted behavior outside of a race track.
-- Launch MCSI_client in a terminal. You should see "STK input client started" in the terminal.
+- Launch MCSI_client, arduino_client and mic_client in terminals. Each of them waits for 5 seconds before sending any inputs.
 - You can start playing !

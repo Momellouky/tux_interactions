@@ -78,7 +78,7 @@ class Color_Detector :
       
       # Creating text string to display( Color name and RGB values )
       color_text = self.__get_color_name(self.colors, r, g, b) + ' R=' + str(r) + ' G=' + str(g) + ' B=' + str(b)
-
+      print(color_text)
       return color_text 
 
 

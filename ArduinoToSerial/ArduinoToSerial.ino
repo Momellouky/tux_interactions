@@ -26,7 +26,7 @@ void loop() {
     power = 0.0;
   }
   else {
-    power = (30.0-RangeInCentimeters)/30.0 + 0.03;
+    power = (14.0-RangeInCentimeters)/14.0 + 0.03;
     if (power > 1.0) {
       power = 1.0;
     }
@@ -35,9 +35,16 @@ void loop() {
   Serial.print("acc ");
   Serial.println(power);
 
-  int vibrationState = digitalRead(2);
+  /*int vibrationState = digitalRead(2);
   Serial.print("bst ");
-  Serial.println(vibrationState);
+  Serial.println(vibrationState);*/
 
-  delay(10);
+  if (digitalRead(2) == HIGH) {
+    Serial.println("bst 1.00");
+  }
+  else {
+    Serial.println("bst 0.00");
+  }
+
+  delay(30);
 }

@@ -3,7 +3,6 @@
 
 ###############################################################################
 ## Global libs
-import serial
 import socket
 import numpy as np
 from time import sleep
@@ -13,7 +12,6 @@ import mediapipe as mp
 import csv
 
 from Direction.face_tracking import get_left_right
-from mic_db import get_rescue
 import FingerCounter.FingerCounter as fc
 from cam_red import get_brake
 import color_detector.color_detector as cd
@@ -21,9 +19,6 @@ import params as p
 
 address = ("localhost", 6006)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-# replace COM5 with whichever serial port the Arduino is connected to
-arduino = serial.Serial(port="COM5", baudrate=9600, timeout=1)
 
 # Initialize MediaPipe Face Detection
 mp_face_detection = mp.solutions.face_detection
@@ -42,17 +37,8 @@ count_fingers = fc.FingerCounter()
 
 color_detector = cd.Color_Detector()
 
-print("STK input client started")
-
-
-def poll_input():
-    data = arduino.readline()
-    data = data[0:-2]
-    data_type = str(data[0:3])
-    data_type = data_type[2:-1]
-    data_value = float(data[4:8])
-    return data_type, data_value
-
+print("STK input client started, inputs starting in 5 seconds")
+sleep(5)
 
 def generate_frame_list(n):
     lst = np.zeros(60, dtype=int)
@@ -82,7 +68,7 @@ def read_file(file):
 
     return csv_data
 
-def click_space(color_name) -> bool:
+def click_space_collaborative(color_name) -> bool:
     arrow = read_file(p.ARROW_FILE)
     bowling_ball = read_file(p.BOWLING_BALL_FILE)
     skimmer = read_file(p.SKIMMER_FILE)
@@ -109,10 +95,16 @@ def click_space(color_name) -> bool:
 
     return False
 
+def click_space_competitive(color_name) -> bool:
+    black_box = read_file(p.BLACK_BOX_FILE)
+    if color_name in black_box :
+        return True
+
+    return False
+
 # Release resources
 def exit_handler():
     cap.release()
-    arduino.close()
 
 atexit.register(exit_handler)
 
@@ -120,68 +112,63 @@ frame_counter = 0
 
 collaboration = True
 
+will_left = False
+will_right = False
+will_rescue = False
+will_brake = False
+will_fire = False
+
 while True:  # main loop
-    will_acc = False
-    will_dri = False
-    will_left = False
-    will_right = False
-    will_bst = False
-    will_rescue = False
-    will_brake = False
-    will_fire = False
-
-    # arduino
-    poll_type, poll_value = poll_input()
-
-    poll_frames_on = int(poll_value * 60)
-    poll_frame_list = generate_frame_list(poll_frames_on)
-
-    if poll_type == "acc" and poll_frame_list[frame_counter] == 1:  # accélération
-        will_acc = True
-    elif poll_type == "dri" and poll_value == 1:  # drift
-        will_dri = True
-    elif poll_type == "bst" and poll_value == 1:  # boost
-        will_bst = True
-
     # face detection
     lr_type, lr_value = get_left_right(cap, face_detection)
+    print(f"{lr_type}:{lr_value}")
 
     lr_frames_on = int(lr_value * 60)
     lr_frame_list = generate_frame_list(lr_frames_on)
 
-    if lr_type == "left" and lr_frame_list[frame_counter] == 1:  # tourner à gauche
+    if lr_type == "left" :
         will_left = True
-    elif lr_type == "right" and lr_frame_list[frame_counter] == 1:  # tourner à droite
+        will_right = False
+        if lr_frame_list[frame_counter] == 1:  # tourner à gauche
+            will_left = True
+        else :
+            will_left = False
+    if lr_type == "right" :
+        will_left = False
         will_right = True
-
-    # microphone rescue
-    if not collaboration:
-        will_rescue = get_rescue(
-            duration=1 / 90, threshold=0.5, amplification=10000
-        )  # 1/90 is an arbitrary value to make sure this loop doesnt take too much time
+        if lr_frame_list[frame_counter] == 1:  # tourner à droite
+            will_right = True
+        else :
+            will_right = False
+    else :
+        will_left = True
+        will_right = False
+        if lr_frame_list[frame_counter] == 1:  # tourner à gauche
+            will_left = True
+        else :
+            will_left = False
 
     # 10 fingers rescue
     if collaboration:
         fingers_value = count_fingers.countFingers(cap)
         if fingers_value >= 10:
             will_rescue = True
+        else :
+            will_rescue = False
 
     # brake
-    will_brake = get_brake(cap, sensitivity=150)
+    will_brake = get_brake(cap, sensitivity=175)
 
     # object
     color_name = color_detector.detect_color(cap)
-    will_fire = click_space(color_name)
+    will_fire = click_space_collaborative(color_name)
+    color_name = color_detector.detect_color(cap)
+    if collaboration :
+        will_fire = click_space_collaborative(color_name)
+    else :
+        will_fire = click_space_competitive(color_name)
 
     # send commands
-    if will_acc:
-        client_socket.sendto(b"P_ACCELERATE", address)
-    else:
-        client_socket.sendto(b"R_ACCELERATE", address)
-    if will_dri:
-        client_socket.sendto(b"P_SKIDDING", address)
-    else:
-        client_socket.sendto(b"R_SKIDDING", address)
     if will_left:
         client_socket.sendto(b"P_LEFT", address)
     else:
@@ -194,10 +181,6 @@ while True:  # main loop
         client_socket.sendto(b"P_RESCUE", address)
     else:
         client_socket.sendto(b"R_RESCUE", address)
-    if will_bst:
-        client_socket.sendto(b"P_BOOST", address)
-    else:
-        client_socket.sendto(b"R_BOOST", address)
     if will_brake:
         client_socket.sendto(b"P_BRAKE", address)
     else:

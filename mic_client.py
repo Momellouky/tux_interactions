@@ -1,7 +1,19 @@
 import sounddevice as sd
 import numpy as np
+import socket
+from time import sleep
 
-def get_rescue(duration, threshold, amplification) :
+address = ("localhost", 6006)
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+duration = 1/60
+threshold = 100
+amplification = 1000
+
+print("Mic client started, inputs in 5 seconds")
+sleep(5)
+
+while True :
     val = False
 
     # Define the sampling frequency
@@ -18,6 +30,6 @@ def get_rescue(duration, threshold, amplification) :
 
     # Check if intensity is above threshold
     if intensity > threshold:
-        val = True
-    
-    return val
+        client_socket.sendto(b"P_BRAKE", address)
+    else:
+        client_socket.sendto(b"R_BRAKE", address)
